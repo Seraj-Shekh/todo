@@ -34,12 +34,11 @@ app.post('/create', (req, res) => {
 
 app.delete('/delete/:id', (req, res) => {
     const pool = openDb()
-    pool.query('DELETE FROM task WHERE id = $1 returning *', 
-    [req.params.id], (error, result) => {
+    pool.query('DELETE FROM task WHERE id = $1', [req.params.id], (error, result) => {
         if (error) {
             return res.status(500).json({error: error.message})
         }
-        return res.status(200).json({id: result.rows[0].id})
+        return res.status(200).json({message: 'Task deleted successfully'})
     })
 });
 

@@ -44,7 +44,7 @@ describe ('POST task', () => {
 
 describe('DELETE task', () => {
     it ('should delete a task', async () => {
-        const response = await fetch('http://localhost:3001/delete/2', {
+        const response = await fetch('http://localhost:3001/delete/15', {
             method: 'delete'
         })
         const data = await response.json();
