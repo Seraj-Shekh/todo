@@ -31,6 +31,18 @@ app.post('/create', (req, res) => {
         return res.status(200).json({id: result.rows[0].id})
     })
 });
+
+app.delete('/delete/:id', (req, res) => {
+    const pool = openDb()
+    pool.query('DELETE FROM task WHERE id = $1 returning *', 
+    [req.params.id], (error, result) => {
+        if (error) {
+            return res.status(500).json({error: error.message})
+        }
+        return res.status(200).json({id: result.rows[0].id})
+    })
+});
+
 const openDb = () => {
     const pool = new Pool({
         user: 'postgres',
