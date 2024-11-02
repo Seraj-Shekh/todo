@@ -1,58 +1,24 @@
 import express from 'express';
 import cors from 'cors';
-import pkg from 'pg';
+import todoRouter from './routes/todoRouter.js';
 
-const port = 3001;
-const { Pool } = pkg
+
+const port = process.env.PORT || 3000;
 
 const app = express();
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
+app.use('/', todoRouter);
 
-
-app.get('/', (req, res) => {
-    const pool = openDb()
-    pool.query('SELECT * FROM task', (error, result) => {
-        if (error) {
-            return res.status(500).json({error: error.message})
-        }
-        res.status(200).json(result.rows)
-    })
+app.use((err, req, res, next) => {
+   const statusCode = err.status || 500;
+   res.status(statusCode).json({
+       error: err.message
+   });
 });
-
-app.post('/create', (req, res) => {
-    const pool = openDb()
-    pool.query('INSERT INTO task (description) VALUES ($1) returning *', 
-    [req.body.description], (error, result) => {
-        if (error) {
-            return res.status(500).json({error: error.message})
-        }
-        return res.status(200).json({id: result.rows[0].id})
-    })
-});
-
-app.delete('/delete/:id', (req, res) => {
-    const pool = openDb()
-    pool.query('DELETE FROM task WHERE id = $1', [req.params.id], (error, result) => {
-        if (error) {
-            return res.status(500).json({error: error.message})
-        }
-        return res.status(200).json({message: 'Task deleted successfully'})
-    })
-});
-
-const openDb = () => {
-    const pool = new Pool({
-        user: 'postgres',
-        host: 'localhost',
-        database: 'todo',
-        password: 'Seraj@1436',
-        port: 5432,
-    })
-    return pool
-}
 
 app.listen(port, () => {
     console.log(`Server running on http://localhost:${port}`);
 });
+
