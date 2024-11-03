@@ -44,22 +44,22 @@ describe ('POST task', () => {
 
 describe('DELETE task', () => {
     it ('should delete a task', async () => {
-        const response = await fetch('http://localhost:3001/delete/15', {
-            method: 'delete'
-        })
+        const response = await fetch('http://localhost:3001/delete/17', {
+            method: 'DELETE'
+        });
         const data = await response.json();
 
         expect(response.status).to.equal(200);
-        expect(data).to.be.an('object').that.has.all.keys('id');
-    })
+        expect(data).to.be.an('object').that.has.all.keys('id', 'message');  // Expect both 'id' and 'message' keys
+    });
+
     it ('should not delete a task that does not exist', async () => {
         const response = await fetch('http://localhost:3001/delete/200', {
-            method: 'delete'
-        })
+            method: 'DELETE'
+        });
         const data = await response.json();
 
-        expect(response.status).to.equal(500);
-        expect(data).to.be.an('object').that.has.all.keys('error');
-    })
-
-})
+        expect(response.status).to.equal(404);  // Now expecting a 404 status for non-existent tasks
+        expect(data).to.be.an('object').that.has.all.keys('error');  // Expecting 'error' key in response
+    });
+});
