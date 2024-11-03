@@ -44,7 +44,7 @@ describe ('POST task', () => {
 
 describe('DELETE task', () => {
     it ('should delete a task', async () => {
-        const response = await fetch('http://localhost:3001/delete/17', {
+        const response = await fetch('http://localhost:3001/delete/60', {
             method: 'DELETE'
         });
         const data = await response.json();
@@ -63,3 +63,22 @@ describe('DELETE task', () => {
         expect(data).to.be.an('object').that.has.all.keys('error');  // Expecting 'error' key in response
     });
 });
+
+describe('POST register', () => {
+    const email = 'registerd@gmail.com'
+    const password = 'password'
+    it ('should register a user with valid email and password', async () => {
+        const response = await fetch('http://localhost:3001/user/register', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({'email':email, 'password':password})
+        })
+        const data = await response.json();
+
+        expect(response.status).to.equal(201,data.error);
+        expect(data).to.be.an('object').that.has.all.keys('id', 'email');
+    })
+    
+})
