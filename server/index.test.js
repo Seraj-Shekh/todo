@@ -1,8 +1,13 @@
 import { expect } from "chai";
+import { initializeTestDb, insertTestUser } from "./helper/test.js";
 
 
 
 describe('GET Tasks', () => {
+    before(() => {
+        initializeTestDb();
+    })
+
     it ('should return all tasks', async () => {
         const response = await fetch ('http://localhost:3001/');
         const data = await response.json();
@@ -44,7 +49,7 @@ describe ('POST task', () => {
 
 describe('DELETE task', () => {
     it ('should delete a task', async () => {
-        const response = await fetch('http://localhost:3001/delete/60', {
+        const response = await fetch('http://localhost:3001/delete/88', {
             method: 'DELETE'
         });
         const data = await response.json();
@@ -65,7 +70,7 @@ describe('DELETE task', () => {
 });
 
 describe('POST register', () => {
-    const email = 'registerd@gmail.com'
+    const email = 'register2@gmail.com'
     const password = 'password'
     it ('should register a user with valid email and password', async () => {
         const response = await fetch('http://localhost:3001/user/register', {
@@ -81,4 +86,24 @@ describe('POST register', () => {
         expect(data).to.be.an('object').that.has.all.keys('id', 'email');
     })
     
+})
+
+//TEST FOE LOGIN
+describe('POST login', () => {
+    const email = 'registerd@gmail.com'
+    const password = 'password'
+    insertTestUser(email, password)
+    it ('should login a user with valid email and password', async () => {
+        const response = await fetch('http://localhost:3001/user/login', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({'email':email, 'password':password})
+        })
+        const data = await response.json();
+
+        expect(response.status).to.equal(200,data.error);
+        expect(data).to.be.an('object').that.has.all.keys('id', 'email', 'token');
+    })
 })
