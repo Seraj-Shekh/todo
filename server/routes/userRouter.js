@@ -8,19 +8,23 @@ const router = Router();
 
 router.post('/register', (req, res, next) => {
     hash(req.body.password, 10, (error, hashedpassword) => {
-        if (error) next(error)
-        try {
-            pool.query('INSERT INTO account (email,password) VALUES ($1, $2) RETURNING *', [req.body.email, hashedpassword], (error, results) => {
-                if (error) next(error)
-                res.status(201).json({ id: results.rows[0].id, email: results.rows[0].email })
+        if (error) return next(error);
 
+        pool.query(
+            'INSERT INTO account (email, password) VALUES ($1, $2) RETURNING *',
+            [req.body.email, hashedpassword],
+            (error, results) => {
+                if (error) return next(error); // Handles SQL errors
+                if (!results || results.rows.length === 0) {
+                    // Handle case where no rows are returned
+                    return res.status(500).json({ error: "User registration failed." });
+                }
+                res.status(201).json({ id: results.rows[0].id, email: results.rows[0].email });
             }
-            )
-        } catch (error) {
-            return next(error)
-        }
-    })
-})
+        );
+    });
+});
+
 
 router.post('/login', (req, res, next) => {
     const invalid_message = 'Invalid email or password'
