@@ -2,14 +2,15 @@ import { expect } from "chai";
 import { initializeTestDb, insertTestUser,getToken } from "./helper/test.js";
 
 
+const base_url = 'http://localhost:3001';
 
 describe('GET Tasks', () => {
-    before(() => {
-        initializeTestDb();
+    before(async() => {
+        await initializeTestDb();
     })
 
     it ('should return all tasks', async () => {
-        const response = await fetch ('http://localhost:3001/');
+        const response = await fetch (base_url+'/');
         const data = await response.json();
 
         expect(response.status).to.equal(200);
@@ -25,7 +26,7 @@ describe ('POST task', () => {
     const token = `Bearer ${getToken(email)}`; 
 
     it('should create a new task', async () => {
-        const response = await fetch('http://localhost:3001/create', {
+        const response = await fetch(base_url + '/create', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -40,54 +41,72 @@ describe ('POST task', () => {
     });
     
     it('should not post a task without description', async () => {
-        const response = await fetch('http://localhost:3001/create', {
+        const response = await fetch(base_url+ '/create', {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
+                'Authorization': token
             },
             body: JSON.stringify({})
         });
         const data = await response.json();
     
-        expect(response.status).to.equal(401);  // Update expected status code to 401
-        expect(data).to.be.an('object').that.has.all.keys('message');  // Adjust to match response structure
+        expect(response.status).to.equal(401); 
+        expect(data).to.be.an('object').that.has.all.keys('message');
     });
+    
+    it('should not post a task with zero length description', async () => {
+        const response = await fetch(base_url+'/create', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': token
+            },
+            body: JSON.stringify({ description: '' })
+        });
+        const data = await response.json();
+    
+        expect(response.status).to.equal(401); 
+        expect(data).to.be.an('object').that.has.all.keys('message'); 
+    });
+
+    
     
 })
 describe('DELETE task', () => {
-    const email = 'registerstye@gmail.com';
+    const email = `register${Math.random().toString().slice(2, 12)}@gmail.com`;
     const password = 'password';
-    let token; // Define token at a higher scope
+    let token;
 
     before(async () => {
-        await insertTestUser(email, password);  // Insert a user for delete tests
-        token = `Bearer ${getToken(email)}`;    // Initialize token after inserting the user
+        await insertTestUser(email, password);  
+        token = `Bearer ${getToken(email)}`;   
     });
 
     it('should delete a task', async () => {
-        const response = await fetch('http://localhost:3001/delete/111', {
+        const response = await fetch(base_url + '/delete/123', {
             method: 'DELETE',
             headers: {
-                'Authorization': token  // Use the token defined above
+                'Authorization': token
             }
         });
         const data = await response.json();
-
+    
         expect(response.status).to.equal(200);
-        expect(data).to.be.an('object').that.has.all.keys('id', 'message');
+        expect(data).to.be.an('object').that.has.all.keys('id', 'message'); 
     });
 
     it('should not delete a task that does not exist', async () => {
-        const response = await fetch('http://localhost:3001/delete/200', {
+        const response = await fetch(base_url+'/delete/200', {
             method: 'DELETE',
             headers: {
-                'Authorization': token  // Use the token defined above
+                'Authorization': token  
             }
         });
         const data = await response.json();
     
         expect(response.status).to.equal(404);  
-        expect(data).to.be.an('object').that.has.all.keys('error');  // Check for 'error' key instead of 'message'
+        expect(data).to.be.an('object').that.has.all.keys('error');  
     });
     
 });
@@ -98,7 +117,7 @@ describe('POST register', () => {
 
     const password = 'password'
     it ('should register a user with valid email and password', async () => {
-        const response = await fetch('http://localhost:3001/user/register', {
+        const response = await fetch(base_url+'/user/register', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -110,6 +129,21 @@ describe('POST register', () => {
         expect(response.status).to.equal(201,data.error);
         expect(data).to.be.an('object').that.has.all.keys('id', 'email');
     })
+
+    it ('should not register a user with less than 8 characters password', async () => {
+        const email = `register${Math.random().toString().slice(2)}@gmail.com`;
+        const password = 'pass'
+        const response = await fetch(base_url+'/user/register', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({'email':email, 'password':password})
+        })
+        const data = await response.json();
+        expect(response.status).to.equal(400,data.error);
+        expect(data).to.be.an('object').that.has.all.keys('error');
+    })
     
 })
 
@@ -119,7 +153,7 @@ describe('POST login', () => {
     const password = 'password'
     insertTestUser(email, password)
     it ('should login a user with valid email and password', async () => {
-        const response = await fetch('http://localhost:3001/user/login', {
+        const response = await fetch(base_url+'/user/login', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'

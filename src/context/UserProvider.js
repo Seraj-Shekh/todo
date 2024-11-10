@@ -4,8 +4,7 @@ import axios from 'axios';
 
 
 const url = process.env.REACT_APP_API_URL;
-console.log("API URL:", url); // This should print "API URL: http://localhost:3000" if the environment variable is loaded correctly
-console.log("Test Variable:", process.env.REACT_APP_TEST_VARIABLE);
+
 
 
 export default function UserProvider({ children }) {
@@ -20,7 +19,7 @@ export default function UserProvider({ children }) {
             await axios.post(`${url}/user/register`, json, headers);
             setUser({ email: '', password: '' });
         } catch (error) {
-            console.error("Sign Up Error:", error); // Log the full error object
+            console.error("Sign Up Error:", error); 
             const message = error.response?.data?.error || "Registration failed. Please try again.";
             throw new Error(message);
         }
@@ -35,7 +34,7 @@ export default function UserProvider({ children }) {
             setUser(response.data);
             sessionStorage.setItem("user", JSON.stringify(response.data));
         } catch (error) {
-            console.error("Sign In Error:", error); // Log the full error object
+            console.error("Sign In Error:", error); 
             const message = error.response?.data?.error || "Login failed. Please check your credentials.";
             throw new Error(message);
         }
